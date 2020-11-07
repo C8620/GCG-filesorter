@@ -1,9 +1,13 @@
 /*
-	Name：		GCG-filesorter
+	Name:		GCG-filesorter
 	Author:		Chise Hachiroku (C86.moe)
 	Email:		i@c86.moe
-	Description:This program can select changed items in by comparing with an older copy and
-				copying the changed ones to a new folder.
+	Description:	This program can select changed items in by comparing with an older copy and
+			
+			
+			
+			
+			copying the changed ones to a new folder.
 	Useage:		<program name> [New copy] [Destination of changed items] [Older copy]
 */
 
@@ -104,6 +108,7 @@ void copy_folder(char* source_path, char* destination_path, char* compare_path)
 		sprintf(address,"%s/%s",source_path,ep_src->d_name);
 		sprintf(toaddress,"%s/%s",destination_path,ep_src->d_name);
 		sprintf(compaddress,"%s/%s",compare_path,ep_src->d_name);
+		
 		if(endwith(address,'.') == 1)
 		{
 			//In this case, it must be either this directory or its ancestor.	
@@ -127,13 +132,13 @@ void copy_folder(char* source_path, char* destination_path, char* compare_path)
 		memset(toaddress,sizeof(toaddress),0);
 		memset(compaddress,sizeof(compaddress),0);
 	}
-	    closedir(dst_dp);
-		closedir(src_dp);
-		// Sometimes no action is done during the process, delete empty folder.
-		char command[520];
-		sprintf(command, "rmdir \"%s\"", destination_path);
-		system(command);
-		return;
+	closedir(dst_dp);
+	closedir(src_dp);
+	// Sometimes no action is done during the process, delete empty folder.
+	char command[520];
+	sprintf(command, "rmdir \"%s\"", destination_path);
+	system(command);
+	return;
 }
 int is_dir( char* file_name)
 {
