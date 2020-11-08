@@ -1,7 +1,7 @@
 /*
 	Name:		GCG-filesorter
 	Author:		Chise Hachiroku (C86.moe)
-	Email:		i@c86.moe
+	Email:		73808043+c86-moe@users.noreply.github.com
 	Description:	This program can select changed items in by comparing with an older copy and		
 			copying the changed ones to a new folder.
 	Useage:		<program name> [New copy] [Destination of changed items] [Older copy]
