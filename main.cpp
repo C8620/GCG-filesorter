@@ -1,9 +1,9 @@
 /*
-	Name:		GCG-filesorter
+	Name：		GCG-filesorter
 	Author:		Chise Hachiroku (C86.moe)
-	Email:		73808043+c86-moe@users.noreply.github.com
-	Description:	This program can select changed items in by comparing with an older copy and		
-			copying the changed ones to a new folder.
+	Email:		i@c86.moe
+	Description:This program can select changed items in by comparing with an older copy and
+				copying the changed ones to a new folder.
 	Useage:		<program name> [New copy] [Destination of changed items] [Older copy]
 */
 
@@ -25,14 +25,16 @@
 int is_dir( char* file_name);
 
 // Check if modified, and copy if it is.
-void cp_file( char *source_path , char *destination_path, char* compare_path)
+int cp_file( char *source_path , char *destination_path, char* compare_path)
 {
 	// Construct compare command and execute it.
-	char command[1030];
-	sprintf(command,"diff -q --speed-large-files \"%s\" \"%s\"",source_path,compare_path);
-	if(system(command)==0){
-		printf("%s is no new. Skip.\n", source_path);
-		return;
+	if(!access(compare_path,0)){
+		char command[1030];
+		sprintf(command,"diff -q --speed-large-files \"%s\" \"%s\" > null",source_path,compare_path);
+		if(system(command)==0){
+			// printf("%s is no new. Skip.\n", source_path);
+			return 0;
+		}
 	}
 
 	// Open files.
@@ -65,6 +67,7 @@ void cp_file( char *source_path , char *destination_path, char* compare_path)
 	} 
 	fclose(fp_src); 
 	fclose(fp_dst); 
+	return 1;
 }
 
 int endwith(char* s,char c){
@@ -77,12 +80,12 @@ int endwith(char* s,char c){
 }
 
 // List every dir and file.
-void copy_folder(char* source_path, char* destination_path, char* compare_path)
+int copy_folder(char* source_path, char* destination_path, char* compare_path)
 {
 	DIR *dst_dp = opendir(destination_path);
 	if(dst_dp  == NULL)
 	{
-		printf("Working on dir %s.\n", source_path);
+		printf("Start processing %s ...\n", source_path);
 		if(mkdir(destination_path,0777) == -1)
 		{
 			printf("Error in creating dir. Abort.\n");
@@ -94,6 +97,7 @@ void copy_folder(char* source_path, char* destination_path, char* compare_path)
 		// Considering the process, it acts as an insurence.
 		exit(2);
 	}
+	int flag = 0;
 	DIR *src_dp = opendir(source_path);	
 	struct dirent *ep_src =  readdir(src_dp);
 	char address[512] = {0};
@@ -104,19 +108,18 @@ void copy_folder(char* source_path, char* destination_path, char* compare_path)
 		sprintf(address,"%s/%s",source_path,ep_src->d_name);
 		sprintf(toaddress,"%s/%s",destination_path,ep_src->d_name);
 		sprintf(compaddress,"%s/%s",compare_path,ep_src->d_name);
-		
 		if(endwith(address,'.') == 1)
 		{
 			//In this case, it must be either this directory or its ancestor.	
 		}
 		else if( ( is_dir(address) != 1) )//if the file is not dir just copy file
 		{
-			cp_file(address,toaddress,compaddress);	
+			flag += cp_file(address,toaddress,compaddress);	
 		}
 		else
 		{
 			// This item is a dir , call copy_folder function again.
-			copy_folder(address,toaddress,compaddress);
+			flag += copy_folder(address,toaddress,compaddress);
 		}
 
 		// All files copied?
@@ -131,10 +134,15 @@ void copy_folder(char* source_path, char* destination_path, char* compare_path)
 	closedir(dst_dp);
 	closedir(src_dp);
 	// Sometimes no action is done during the process, delete empty folder.
-	char command[520];
-	sprintf(command, "rmdir \"%s\"", destination_path);
-	system(command);
-	return;
+	if(!flag){
+		printf("Done processing  %s , No changes done.\n", source_path);
+		char command[520];
+		sprintf(command, "rmdir \"%s\" ", destination_path);
+		system(command);
+	}else{
+		printf("Done processing  %s , %d files copied.\n", source_path, flag);
+	}
+	return flag;
 }
 int is_dir( char* file_name)
 {
@@ -149,12 +157,14 @@ int is_dir( char* file_name)
 int main( int argc , char** argv)
 {
 	printf("(GCG) Differented files extractor by i@C86.moe\n");
+	printf("For more: https://foss.c86.moe/GCG-FileSorter/\n");
+	printf("==============================================\n");
 	if(argc != 4)
 	{
 		printf("Usage: %s <Origin Dir> <Target Dir> <Old Dir>\n",argv[0]);
 		exit(1);
 	}
 	copy_folder(argv[1],argv[2],argv[3]);
-	printf("Done.\n");
+	printf("\nExtraction finished.\n\n");
 	return 0;
 }
