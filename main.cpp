@@ -1,10 +1,10 @@
 /*
-	Name：		GCG-filesorter
-	Author:		Chise Hachiroku (C86.moe)
-	Email:		i@c86.moe
-	Description:This program can select changed items in by comparing with an older copy and
-				copying the changed ones to a new folder.
-	Useage:		<program name> [New copy] [Destination of changed items] [Older copy]
+	Name:        GCG-filesorter
+	Author:      Chise Hachiroku (C86.moe)
+	Email:       86@foss.c86.moe
+	Description: This program can select changed items in by comparing with an older copy and
+	             copying the changed ones to a new folder.
+	Useage:      <program name> [New copy] [Destination of changed items] [Older copy]
 */
 
 // Listing all possible headers. May not use them all.
@@ -41,11 +41,11 @@ int cp_file( char *source_path , char *destination_path, char* compare_path)
 	FILE* fp_src = NULL;
 	FILE* fp_dst = NULL;
 	if((fp_src = fopen(source_path,"r"))==NULL){
-		printf("Error in opening %s. Abort.\n", source_path);
+		printf("\033[1;31mError in opening %s. Abort.\033[0m\n", source_path);
 		exit(1);
 	}
 	if((fp_dst=fopen(destination_path,"w"))==NULL){
-		printf("Error in creating %s. Abort.\n", destination_path);
+		printf("\033[1;31mError in creating %s. Abort.\033[0m\n", destination_path);
 		exit(1);
 	}
 
@@ -85,15 +85,15 @@ int copy_folder(char* source_path, char* destination_path, char* compare_path)
 	DIR *dst_dp = opendir(destination_path);
 	if(dst_dp  == NULL)
 	{
-		printf("Start processing %s ...\n", source_path);
+		printf("\033[1;35mStart processing %s ...\033[0m\n", source_path);
 		if(mkdir(destination_path,0777) == -1)
 		{
-			printf("Error in creating dir. Abort.\n");
+			printf("\n\033[1;31mError:\033[0m Cannot create dir. Abort.\n\n");
 			exit(-1);
 		}
 	}
 	else{
-		printf("Destination dir exists. May overwrite existing data. Abort.\n");
+		printf("\n\033[1;31mError: \033[0mDestination dir exists. May overwrite existing data. Abort.\n\n");
 		// Considering the process, it acts as an insurence.
 		exit(2);
 	}
@@ -135,12 +135,12 @@ int copy_folder(char* source_path, char* destination_path, char* compare_path)
 	closedir(src_dp);
 	// Sometimes no action is done during the process, delete empty folder.
 	if(!flag){
-		printf("Done processing  %s , No changes done.\n", source_path);
+		printf("\033[1;32mDone processing  %s , No changes done.\033[0m\n", source_path);
 		char command[520];
 		sprintf(command, "rmdir \"%s\" ", destination_path);
 		system(command);
 	}else{
-		printf("Done processing  %s , %d files copied.\n", source_path, flag);
+		printf("\033[1;32mDone processing  %s , %d file%c copied.\033[0m\n", source_path, flag, flag != 1 ? 's' : '\0');
 	}
 	return flag;
 }
@@ -156,8 +156,9 @@ int is_dir( char* file_name)
 
 int main( int argc , char** argv)
 {
+	printf("\n\033[36m");
 	printf("(GCG) Differented files extractor by i@C86.moe\n");
-	printf("For more: https://foss.c86.moe/GCG-FileSorter/\n");
+	printf("For more: \033[4mhttps://foss.c86.moe/GCG-FileSorter/\033[0m\n");
 	printf("==============================================\n");
 	if(argc != 4)
 	{
@@ -165,6 +166,7 @@ int main( int argc , char** argv)
 		exit(1);
 	}
 	copy_folder(argv[1],argv[2],argv[3]);
-	printf("\nExtraction finished.\n\n");
+	printf("\n\033[1;5;34mExtraction finished.\033[0m\n\n");
+	getchar();
 	return 0;
 }
