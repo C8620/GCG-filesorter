@@ -5,28 +5,48 @@
 	Description: This program can select changed items in by comparing with an older copy and
 	             copying the changed ones to a new folder.
 	Useage:      <program name> [New copy] [Destination of changed items] [Older copy]
+	ATTENTION:   D E S I G N E D   O N L Y   F O R   L I N U X / U N I X   S Y S T E M !
+	             D O E S   N O T   W O R K   O N   W I N D O W S !
 */
 
 // Listing all possible headers. May not use them all.
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdbool.h>
-#include<unistd.h>
-#include<string.h>
-#include<strings.h>
-#include<errno.h>
-#include<sys/stat.h>
-#include<sys/types.h>
-#include<fcntl.h>
-#include<dirent.h>
-#include<time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <string.h>
+#include <strings.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <time.h>
 
 // Define ahead to avoid some certain issues.
 int is_dir( char* file_name);
+int cp_file( char *source_path , char *destination_path, char* compare_path);
+int endwith(char* s,char c);
+int copy_folder(char* source_path, char* destination_path, char* compare_path);
+
+int main( int argc , char** argv){
+	printf("\n\033[36m");
+	printf("(GCG) Differented files extractor by i@C86.moe\n");
+	printf("For more: \033[4mhttps://foss.c86.moe/GCG-FileSorter/\033[0m\n");
+	printf("==============================================\n");
+	if(argc != 4)
+	{
+		printf("Usage: %s <Origin Dir> <Target Dir> <Old Dir>\n",argv[0]);
+		exit(1);
+	}
+	copy_folder(argv[1],argv[2],argv[3]);
+	printf("\n\033[1;5;34mExtraction finished.\033[0m\n\n");
+	getchar();
+	return 0;
+}
 
 // Check if modified, and copy if it is.
-int cp_file( char *source_path , char *destination_path, char* compare_path)
-{
+int cp_file( char *source_path , char *destination_path, char* compare_path){
 	// Construct compare command and execute it.
 	if(!access(compare_path,0)){
 		char command[1030];
@@ -51,15 +71,11 @@ int cp_file( char *source_path , char *destination_path, char* compare_path)
 
 	// Copying. Not very efficient indeed.
 	int c;
-	while(1) // A dead loop indeed. May work better in this case.
-	{
+	while(1){ // A dead loop indeed. May work better in this case.
 		c = fgetc(fp_src);
-		if( c == EOF && feof(fp_src))
-		{
+		if( c == EOF && feof(fp_src)){
 			break;
-		}
-		else if( ferror(fp_src))
-		{
+		}else if( ferror(fp_src)){
 			perror("fget()");
 			break;
 		}
@@ -73,21 +89,17 @@ int cp_file( char *source_path , char *destination_path, char* compare_path)
 int endwith(char* s,char c){
 	if(s[strlen(s)-1]==c){
 		return 1;
-	}
-	else{
+	}else{
 		return 0;
 	}
 }
 
 // List every dir and file.
-int copy_folder(char* source_path, char* destination_path, char* compare_path)
-{
+int copy_folder(char* source_path, char* destination_path, char* compare_path){
 	DIR *dst_dp = opendir(destination_path);
-	if(dst_dp  == NULL)
-	{
+	if(dst_dp  == NULL){
 		printf("\033[1;35mStart processing %s ...\033[0m\n", source_path);
-		if(mkdir(destination_path,0777) == -1)
-		{
+		if(mkdir(destination_path,0777) == -1){
 			printf("\n\033[1;31mError:\033[0m Cannot create dir. Abort.\n\n");
 			exit(-1);
 		}
@@ -103,21 +115,17 @@ int copy_folder(char* source_path, char* destination_path, char* compare_path)
 	char address[512] = {0};
 	char toaddress[512] = {0};
 	char compaddress[512] = {0};
-	while(1)
-	{
+	while(1){
 		sprintf(address,"%s/%s",source_path,ep_src->d_name);
 		sprintf(toaddress,"%s/%s",destination_path,ep_src->d_name);
 		sprintf(compaddress,"%s/%s",compare_path,ep_src->d_name);
-		if(endwith(address,'.') == 1)
-		{
+		if(endwith(address,'.') == 1){
 			//In this case, it must be either this directory or its ancestor.	
 		}
-		else if( ( is_dir(address) != 1) )//if the file is not dir just copy file
-		{
+		else if( ( is_dir(address) != 1) ){//if the file is not dir just copy file
 			flag += cp_file(address,toaddress,compaddress);	
 		}
-		else
-		{
+		else{
 			// This item is a dir , call copy_folder function again.
 			flag += copy_folder(address,toaddress,compaddress);
 		}
@@ -144,8 +152,8 @@ int copy_folder(char* source_path, char* destination_path, char* compare_path)
 	}
 	return flag;
 }
-int is_dir( char* file_name)
-{
+
+int is_dir( char* file_name){
 	struct stat info;
 	stat(file_name,&info);
 	if(S_ISDIR(info.st_mode))
@@ -154,19 +162,4 @@ int is_dir( char* file_name)
 		return 0;
 }
 
-int main( int argc , char** argv)
-{
-	printf("\n\033[36m");
-	printf("(GCG) Differented files extractor by i@C86.moe\n");
-	printf("For more: \033[4mhttps://foss.c86.moe/GCG-FileSorter/\033[0m\n");
-	printf("==============================================\n");
-	if(argc != 4)
-	{
-		printf("Usage: %s <Origin Dir> <Target Dir> <Old Dir>\n",argv[0]);
-		exit(1);
-	}
-	copy_folder(argv[1],argv[2],argv[3]);
-	printf("\n\033[1;5;34mExtraction finished.\033[0m\n\n");
-	getchar();
-	return 0;
-}
+
